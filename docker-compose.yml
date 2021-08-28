@@ -1,0 +1,52 @@
+version: "3.7"
+services:
+  router:
+    image: nginx:1.16.1
+    ports:
+      - "80:80"
+    volumes:
+      - ./etc/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./src:/var/www/html
+    networks:
+      - magento-network
+
+  app:
+    build: ./etc/phpfpm
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - magento-network
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./etc/sql:/docker-entrypoint-initdb.d:ro
+    networks:
+      - magento-network
+
+  elastic:
+    image: elasticsearch:7.6.2
+    ports:
+      - "9300:9300"
+      - "9200:9200"
+    environment:
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    networks:
+      - magento-network
+
+networks:
+  magento-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
