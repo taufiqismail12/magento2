@@ -1,15 +1,49 @@
-stop-dev:
-	docker-compose down
+#########################################################################
+## Make file
+## @author: Taufiq ismail <taufiqismail04@gmail.com>
+## @since: 2021/08/28
+#########################################################################
 
-start-dev:
-	docker-compose up -d
+DOCKER_COMPOSE=docker-compose
+DOCKER_EXEC_MAGENTO=docker-compose exec app bin/magento
 
-init-dev:
-	docker-compose exec app bin/magento setup:config:set --backend-frontname=admin --db-host=mysql --db-name=magentodb --db-user=myuser --db-password=test123
-	docker-compose exec app bin/magento setup:install --elasticsearch-host=elastic --elasticsearch-port=9200
-	docker-compose exec app bin/magento module:disable Magento_TwoFactorAuth
-	docker-compose exec app bin/magento indexer:reindex catalogsearch_fulltext
+define setup_env
+	@echo " - setup env"
+	$(eval include .env)
+	$(eval export sed 's/=.*//' .env)
+endef
+
+#### Basic Command
+start-app:
+	@$(DOCKER_COMPOSE) up -d
+	@echo "Wait for 30 seconds for database and es up and running properly"
+	@sleep 30
+
+stop-app:
+	@$(DOCKER_COMPOSE) stop
 
 clear-cache:
-	docker-compose exec app bin/magento cache:clean
-	docker-compose exec app bin/magento cache:flush
+	@$(DOCKER_EXEC_MAGENTO) cache:clean
+	@$(DOCKER_EXEC_MAGENTO) cache:flush
+
+
+### Magento Instalation for dev environment
+
+init-dev:
+	rm -rf app/etc/env.php
+	rm -rf .env
+	@cp .env.local .env
+	@make install-magento
+
+install-magento:
+	$(call setup_env,local)
+	@echo "Starting App......"
+	@make start-app
+	@echo "Setup magento start"
+	@$(DOCKER_EXEC_MAGENTO) setup:config:set --backend-frontname=${BACKEND_FRONTNAME} --db-host=${MYSQL_HOST} --db-name=${MYSQL_DATABASE} --db-user=${MYSQL_USER} --db-password=${MYSQL_PASSWORD}
+	@$(DOCKER_EXEC_MAGENTO) setup:install --elasticsearch-host=${ELASTICSEARCH_HOST} --elasticsearch-port=${ELASTICSEARCH_PORT}
+	@$(DOCKER_EXEC_MAGENTO) admin:user:create --admin-user='${ADMIN_USER}' --admin-password='${ADMIN_PASSWORD}' --admin-email='${ADMIN_EMAIL}' --admin-firstname='${ADMIN_FIRSTNAME}' --admin-lastname='${ADMIN_LASTNAME}'
+	@$(DOCKER_EXEC_MAGENTO) module:disable Magento_TwoFactorAuth
+	@$(DOCKER_EXEC_MAGENTO) indexer:reindex catalogsearch_fulltext
+	@make clear-cache
+	@echo "Setup magento Finish"
