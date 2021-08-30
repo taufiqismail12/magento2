@@ -1,7 +1,7 @@
 version: "3.7"
 services:
     router:
-        image: nginx:1.18-alpine
+        image: nginx:1.16.1
         ports:
             - "80:80"
         volumes:
@@ -32,13 +32,6 @@ services:
         environment:
             - "discovery.type=single-node"
             - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-        networks:
-            - magento-network
-
-    app:
-        build: ./etc/phpfpm
-        volumes:
-            - ./:/var/www/html
         networks:
             - magento-network
 
