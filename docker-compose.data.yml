@@ -1,0 +1,36 @@
+version: "3.7"
+services:
+    database:
+        image: mariadb:10.4
+        environment:
+            MYSQL_DATABASE: "${MYSQL_DATABASE}"
+            MYSQL_USER: "${MYSQL_USER}"
+            MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+            MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+        ports:
+            - "3306:3306"
+        networks:
+            magento-network:
+                aliases: 
+                    - mariadb
+
+    elasticsearch:
+        image: elasticsearch:7.9.3
+        ports:
+            - "9300:9300"
+            - "9200:9200"
+        environment:
+            - "discovery.type=single-node"
+            - "ES_JAVA_OPTS=${ELASTICSEARCH_ES_JAVA_OPTS}"
+        networks:
+            magento-network:
+                aliases: 
+                    - elastic
+
+networks:
+    magento-network:
+        driver: bridge
+
+volumes:
+    dbdata:
+        driver: local
