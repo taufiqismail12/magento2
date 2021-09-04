@@ -1,12 +1,3 @@
-<!---
-    Thank you for contributing to Magento.
-    To help us process this pull request we recommend that you add the following information:
-     - Summary of the pull request,
-     - Issue(s) related to the changes made,
-     - Manual testing scenarios
-    Fields marked with (*) are required. Please don't remove the template.
--->
-
 <!--- Please provide a general summary of the Pull Request in the Title above -->
 
 ### Description (*)
