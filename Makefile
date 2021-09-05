@@ -14,6 +14,11 @@ define setup_env
 	$(eval export sed 's/=.*//' .env)
 endef
 
+
+#### Install pre-requiset
+install-php-cs-fixer:
+	@composer global require friendsofphp/php-cs-fixer
+
 #### Basic Command
 
 data-service-start:
@@ -59,6 +64,7 @@ install-magento:
 	@make clear-cache
 	@echo "Finish.."
 
+
 ### Environment Initialization
 
 remove-env:
@@ -69,6 +75,29 @@ remove-env:
 init-dev:
 	@make remove-env
 	@cp ./etc/env/.env.local .env
+	@cp ./src/composer.dev.json ./src/composer.json
+
+#### Composer
+
+remove-composer:
+	rm -rf src/vendor
+	rm -rf src/composer.json
+
+composer-install:
+	cd src/
+	@composer install
+
+init-setup:
+	@make remove-composer
+	@cp src/composer.dev.json src/composer.json
+	@make composer-install
+
+init-sample-data-setup:
+	@make remove-composer
+	@cp src/composer.sample.json src/composer.json
+	@make composer-install
+	
 
 
-####
+
+
