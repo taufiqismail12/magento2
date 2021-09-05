@@ -64,6 +64,27 @@ install-magento:
 	@make clear-cache
 	@echo "Finish.."
 
+exec-magento:
+	@$(DOCKER_COMPOSE_APP) exec app bash
+
+#### Composer
+
+remove-composer:
+	rm -rf ./src/vendor
+	rm -rf ./src/composer.json
+
+composer-install:
+	cd src/ && composer install
+
+init-setup:
+	@make remove-composer
+	@cp ./src/composer.dev.json ./src/composer.json
+	@make composer-install
+
+init-sample-data-setup:
+	@make remove-composer
+	@cp src/composer.sample.json src/composer.json
+	@make composer-install
 
 ### Environment Initialization
 
@@ -75,29 +96,4 @@ remove-env:
 init-dev:
 	@make remove-env
 	@cp ./etc/env/.env.local .env
-	@cp ./src/composer.dev.json ./src/composer.json
-
-#### Composer
-
-remove-composer:
-	rm -rf src/vendor
-	rm -rf src/composer.json
-
-composer-install:
-	cd src/
-	@composer install
-
-init-setup:
-	@make remove-composer
-	@cp src/composer.dev.json src/composer.json
-	@make composer-install
-
-init-sample-data-setup:
-	@make remove-composer
-	@cp src/composer.sample.json src/composer.json
-	@make composer-install
 	
-
-
-
-
